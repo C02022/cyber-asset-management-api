@@ -27,7 +27,7 @@ class Assets(Resource):
         if assets: 
             return jsonify(assets)
         else: # If our list of assets we obtain is empty, it will be 'False' and return an error message instead
-            return "Cyber Assets not found"
+            return "Cyber assets not found"
     
     def post(self):
         args = body_parser.parse_args()
@@ -43,7 +43,7 @@ class Assets(Resource):
         """
 
         new_asset_id = exec_insert_returning(post_sql_query, (new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system))
-        return f"Cyber Asset with the id: {new_asset_id} created successfully"
+        return f"Cyber asset with the id: {new_asset_id} created successfully"
 
 class AssetsID(Resource):
     def get(self, id):
@@ -60,7 +60,11 @@ class AssetsID(Resource):
             }
             return asset_dict
         else:
-            return "Cyber Asset not found"
+            return "Cyber asset not found"
 
     def delete(self, id):
-        pass
+        delete_sql_query = """ DELETE FROM CYBER_ASSET WHERE ID=? """
+        exec_commit(delete_sql_query, (id,))
+
+        return_message = "The cyber asset with id: {} has been deleted.".format(id)
+        return return_message
