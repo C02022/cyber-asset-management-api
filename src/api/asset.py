@@ -14,17 +14,36 @@ class Assets(Resource):
         result = exec_get_all(get_sql_query)
 
         assets = [
-            dict(id=row[0], name=row[1], type=row[2], serial_number=row, operating_system=row[4])
+            {
+                "id": row[0], 
+                "name": row[1], 
+                "type": row[2], 
+                "serial_number": row[3], 
+                "operating_system": row[4]
+            }
             for row in result
         ]
 
-        if assets:
-            return assets
-        else:
+        if assets: 
+            return jsonify(assets)
+        else: # If our list of assets we obtain is empty, it will be 'False' and return an error message instead
             return "Assets not found"
     
     def post(self):
-        pass
+        args = body_parser.parse_args()
+
+        new_asset_name = args['NAME']
+        new_asset_type = args['TYPE']
+        new_asset_serial_number = args['SERIAL_NUMBER']
+        new_operating_system = args['OPERATING_SYSTEM']
+
+        post_sql_query = """ 
+            INSERT INTO CYBER_ASSET(NAME, TYPE, SERIAL_NUMBER, OPERATING_SYSTEM)
+            VALUES (?, ? , ?, ?)
+        """
+
+        new_asset_id = exec_insert_returning(post_sql_query, (new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system))
+        return f"Cyber Asset with the id: {new_asset_id} created successfully"
 
 class AssetsID(Resource):
     def get(self, id):
