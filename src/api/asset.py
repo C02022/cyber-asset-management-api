@@ -1,4 +1,3 @@
-from flask import jsonify
 from flask_restful import Resource, reqparse
 from db.db_utils import *
 from http import HTTPStatus
