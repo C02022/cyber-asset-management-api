@@ -38,9 +38,6 @@ class Assets(Resource):
         new_asset_serial_number = args['SERIAL_NUMBER']
         new_operating_system = args['OPERATING_SYSTEM']
 
-        if not all([new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system]):
-            return "Missing required cyber asset fields", HTTPStatus.BAD_REQUEST
-
         post_sql_query = """ 
             INSERT INTO CYBER_ASSET(NAME, TYPE, SERIAL_NUMBER, OPERATING_SYSTEM)
             VALUES (?, ? , ?, ?)
@@ -68,6 +65,34 @@ class AssetsID(Resource):
             return asset_dict
         else:
             return "Cyber asset not found", HTTPStatus.NOT_FOUND
+
+    def put(self, id):
+        args = body_parser.parse_args()
+
+        new_asset_name = args['NAME']
+        new_asset_type = args['TYPE']
+        new_asset_serial_number = args['SERIAL_NUMBER']
+        new_operating_system = args['OPERATING_SYSTEM']
+
+        updated_asset = {
+            "id": id,
+            "name": new_asset_name,
+            "type": new_asset_type,
+            "serial_number": new_asset_serial_number,
+            "operating_system": new_operating_system
+        }
+
+        put_sql_query = """ 
+            UPDATE CYBER_ASSET SET
+            NAME=?,
+            TYPE=?,
+            SERIAL_NUMBER=?,
+            OPERATING_SYSTEM=?
+            WHERE ID=?
+        """ 
+
+        exec_commit(put_sql_query, (new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system, id))
+        return updated_asset 
 
     def delete(self, id):
         delete_sql_query = """ DELETE FROM CYBER_ASSET WHERE ID=? """
