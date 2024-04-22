@@ -27,10 +27,11 @@ def exec_get_all(sql, args={}):
 def exec_commit(sql, args={}):
     conn = connect()
     cur = conn.cursor()
-    result = cur.execute(sql, args)
+    cur.execute(sql, args)
+    rows_affected = cur.rowcount # Acquire the number of rows affected after a change to the database
     conn.commit()
     conn.close()
-    return result
+    return rows_affected
 
 def exec_insert_returning(sql, args={}):
     """

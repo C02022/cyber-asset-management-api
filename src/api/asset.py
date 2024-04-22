@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 from db.db_utils import *
+from http import HTTPStatus
 
 body_parser = reqparse.RequestParser()
 body_parser.add_argument('NAME', type=str,  location='json')
@@ -27,7 +28,7 @@ class Assets(Resource):
         if assets: 
             return jsonify(assets)
         else: # If our list of assets we obtain is empty, it will be 'False' and return an error message instead
-            return "Cyber assets not found"
+            return "Cyber assets not found", HTTPStatus.NOT_FOUND
     
     def post(self):
         args = body_parser.parse_args()
@@ -37,13 +38,19 @@ class Assets(Resource):
         new_asset_serial_number = args['SERIAL_NUMBER']
         new_operating_system = args['OPERATING_SYSTEM']
 
+        if not all([new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system]):
+            return "Missing required cyber asset fields", HTTPStatus.BAD_REQUEST
+
         post_sql_query = """ 
             INSERT INTO CYBER_ASSET(NAME, TYPE, SERIAL_NUMBER, OPERATING_SYSTEM)
             VALUES (?, ? , ?, ?)
         """
 
-        new_asset_id = exec_insert_returning(post_sql_query, (new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system))
-        return f"Cyber asset with the id: {new_asset_id} created successfully"
+        try:
+            new_asset_id = exec_insert_returning(post_sql_query, (new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system))
+            return f"Cyber asset with the id: {new_asset_id} created successfully", HTTPStatus.CREATED
+        except Exception as e:
+            return f"Error creating cyber asset: {str(e)}", HTTPStatus.INTERNAL_SERVER_ERROR
 
 class AssetsID(Resource):
     def get(self, id):
@@ -60,11 +67,13 @@ class AssetsID(Resource):
             }
             return asset_dict
         else:
-            return "Cyber asset not found"
+            return "Cyber asset not found", HTTPStatus.NOT_FOUND
 
     def delete(self, id):
         delete_sql_query = """ DELETE FROM CYBER_ASSET WHERE ID=? """
-        exec_commit(delete_sql_query, (id,))
-
-        return_message = "The cyber asset with id: {} has been deleted.".format(id)
-        return return_message
+        rows_affected = exec_commit(delete_sql_query, (id,))
+        
+        if rows_affected > 0:
+            return f"The cyber asset with id: {id} has been deleted.", HTTPStatus.OK
+        else:
+            return "Cyber asset not found or already deleted", HTTPStatus.NOT_FOUND
