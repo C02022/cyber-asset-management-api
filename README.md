@@ -67,9 +67,14 @@ Before running the API, ensure you have the following installed:
 
 - Returns a list of all cyber assets in the database.
 
+  **Query Parameters:**
+
+  - `type`: Filter assets by type.
+
   Example:
+
   ```
-  GET /assets
+  GET /assets?type=Laptop
   ```
 
 ### POST /assets
@@ -94,6 +99,21 @@ Before running the API, ensure you have the following installed:
   Example:
   ```
   GET /assets/1
+  ```
+
+### PUT /assets/{id}
+
+- Updates details of a specific asset by ID.
+
+  **Request Body (JSON):**
+
+  ```json
+  {
+      "NAME": "Updated Asset Name",
+      "TYPE": "Updated Asset Type",
+      "SERIAL_NUMBER": "XYZ789",
+      "OPERATING_SYSTEM": "Linux"
+  }
   ```
 
 ### DELETE /assets/{id}
@@ -128,7 +148,26 @@ You can test the API using tools like Postman or by making HTTP requests from yo
    GET /assets
    ```
 
-3. Delete an asset:
+3. Retrieve assets filtered by type:
+
+   ```
+   GET /assets?type=Router
+   ```
+
+4. Update an asset:
+
+   ```
+   PUT /assets/1
+   Request Body:
+   {
+       "NAME": "Updated Asset Name",
+       "TYPE": "Updated Asset Type",
+       "SERIAL_NUMBER": "XYZ789",
+       "OPERATING_SYSTEM": "Linux"
+   }
+   ```
+
+5. Delete an asset:
 
    ```
    DELETE /assets/1
