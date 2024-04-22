@@ -81,18 +81,22 @@ class AssetsID(Resource):
             "serial_number": new_asset_serial_number,
             "operating_system": new_operating_system
         }
-
+        
         put_sql_query = """ 
-            UPDATE CYBER_ASSET SET
+            UPDATE ASSET SET
             NAME=?,
             TYPE=?,
             SERIAL_NUMBER=?,
             OPERATING_SYSTEM=?
             WHERE ID=?
         """ 
+        
+        rows_affected = exec_commit(put_sql_query, (new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system, id))
 
-        exec_commit(put_sql_query, (new_asset_name, new_asset_type, new_asset_serial_number, new_operating_system, id))
-        return updated_asset 
+        if rows_affected > 0:
+            return updated_asset, HTTPStatus.OK
+        else:
+            return "Cyber asset not found or update failed", HTTPStatus.NOT_FOUND
 
     def delete(self, id):
         delete_sql_query = """ DELETE FROM CYBER_ASSET WHERE ID=? """
