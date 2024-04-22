@@ -3,6 +3,9 @@ from flask_restful import Resource, reqparse
 from db.db_utils import *
 from http import HTTPStatus
 
+query_parser = reqparse.RequestParser()
+query_parser.add_argument('type', type=str, location='args')
+
 body_parser = reqparse.RequestParser()
 body_parser.add_argument('NAME', type=str,  location='json')
 body_parser.add_argument('TYPE', type=str, location='json')
@@ -11,8 +14,16 @@ body_parser.add_argument('OPERATING_SYSTEM', type=str, location='json')
 
 class Assets(Resource):
     def get(self):
+        args = query_parser.parse_args()
+        asset_type = args['type']
+
         get_sql_query = "SELECT * FROM CYBER_ASSET"
-        result = exec_get_all(get_sql_query)
+
+        if asset_type is not None: # If 'type' parameter is provided, filter cyber assets by type
+            get_sql_query += " WHERE TYPE=?"
+            result = exec_get_all(get_sql_query, (asset_type,))
+        else: # Otherwise, fetech all cyber assets in the database like normal
+            result = exec_get_all(get_sql_query)
 
         assets = [
             {
@@ -26,7 +37,7 @@ class Assets(Resource):
         ]
 
         if assets: 
-            return jsonify(assets)
+            return ({"assets": assets}), HTTPStatus.OK
         else: # If our list of assets we obtain is empty, it will be 'False' and return an error message instead
             return "Cyber assets not found", HTTPStatus.NOT_FOUND
     
